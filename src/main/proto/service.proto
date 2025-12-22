@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package org.example.grpc;
+
+option java_multiple_files = true;
+option java_package = "org.example.grpc";
+
+service FlightService {
+  // 1. Шаг: Клиент запрашивает публичный ключ сервера (PEM формат)
+  rpc GetPublicKey (Empty) returns (PublicKeyResponse);
+
+  // 2. Шаг: Клиент отправляет свой AES ключ, зашифрованный публичным ключом сервера
+  rpc SetSessionKey (SessionKeyRequest) returns (StatusResponse);
+
+  // 3. Шаг: Потоковая отправка данных (Client streaming)
+  // Клиент открывает 1 соединение и "льет" массив данных.
+  rpc StreamFlights (stream EncryptedPacket) returns (StatusResponse);
+}
+
+message Empty {}
+
+message PublicKeyResponse {
+  bytes pemKey = 1; // RSA Public Key в формате X.509
+}
+
+message SessionKeyRequest {
+  bytes wrappedKey = 1; // AES ключ, зашифрованный RSA
+}
+
+message EncryptedPacket {
+  bytes iv = 1;           // Вектор инициализации
+  bytes encryptedData = 2; // Зашифрованные байты (serialized FlightData)
+}
+
+message StatusResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// Структура данных для сериализации (внутри зашифрованного пакета)
+message FlightData {
+  string flightNo = 1;
+  string airlineName = 2;
+  string aircraftModel = 3;
+  string depCity = 4;
+  string depCode = 5;
+  string arrCity = 6;
+  string arrCode = 7;
+  string passengerName = 8;
+  string passportNo = 9;
+  string flightDate = 10;
+}

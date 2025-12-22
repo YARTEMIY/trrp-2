@@ -37,13 +37,11 @@ public class ServerApp {
         }
     }
 
-    // --- ЛОГИКА СОКЕТОВ ---
     private static void runSocketServer(int port) throws Exception {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 System.out.println("Ждем клиента...");
                 Socket client = serverSocket.accept();
-                // Обработка клиента в отдельном потоке
                 new Thread(() -> handleClient(client)).start();
             }
         }
@@ -53,7 +51,6 @@ public class ServerApp {
         try (ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream ois = new ObjectInputStream(socket.getInputStream())) {
 
-            // 1. Handshake: Генерируем RSA, отправляем публичный ключ
             KeyPair rsaPair = CryptoUtils.generateRSAKeys();
             oos.writeObject(rsaPair.getPublic());
             oos.flush();
