@@ -55,7 +55,6 @@ public class ServerApp {
             oos.writeObject(rsaPair.getPublic());
             oos.flush();
 
-            // 2. Получаем зашифрованный AES ключ и расшифровываем его
             byte[] wrappedAesKey = (byte[]) ois.readObject();
             SecretKey aesKey = CryptoUtils.unwrapAESKey(wrappedAesKey, rsaPair.getPrivate());
             System.out.println("Клиент подключен, ключ согласован.");
